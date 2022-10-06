@@ -1,0 +1,1 @@
+INSERT INTO [SecurityParameter] ([Category],[Parameter],[Description],[CreatedBy],[ModifiedBy],[Type]) VALUES ('Edit','LoadStatusOverride','Allow the user to change the Load Status regardless of Load Lock Status or Force Next Status settings.','Scott','Scott','Load')
