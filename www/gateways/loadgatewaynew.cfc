@@ -7404,4 +7404,468 @@
 	<cfreturn qBOLReportShort>
 	</cfif>
 	</cffunction>
+
+	<cffunction name="uploadCSVCustomer" access="public" output="yes" returnformat="json">
+		<cftry>
+			<cfset row="">
+			<cfset response = structNew()>	
+
+			<cfset rootPath = expandPath('../fileupload/tempCSV/')>
+			<cfif not directoryExists(rootPath)>
+				<cfdirectory action = "create" directory = "#rootPath#" > 
+			</cfif>
+
+			<cffile action="upload" filefield="file" destination="#rootPath#" nameConflict="MakeUnique" result=uploadedFile>
+
+			<cfif uploadedFile.SERVERFILEEXT NEQ 'csv'>
+				<cfset response.success = 0>
+				<cfset response.message = "Invalid file extension.Please upload CSV file.">
+				<cfreturn response>
+			</cfif>
+
+			<cfset fileName = uploadedFile.SERVERFILE>
+		
+			<cffile action="read" file="#rootPath##fileName#" variable="csvfile">
+
+			<cfset validHeader = "Carrier Flat Rate,Customer Flat Rate,Equipment Name,Agent Login Name,Dispatcher Login Name,Pickup Date,Delivery Date,PRO##,BOL##,PONumber,Pickup##,Shipper Name,Shipper Address,Shipper City,Shipper State,Shipper Zip,Delivery##,Destination Name,Destination Address,Destination City,Destination State,Destination Zip,Notes,Dispatch Notes,Carrier Notes,Commodity Qty,Commidity Type,Commodity Description,Commodity Fee,Commodity Weight,Commodity Class,Commodity Cust Rate,Commodity Carr Rate,Commodity Cust Percent,LTL,Equipment Length">
+			<cfset uploadedHeader = listgetAt('#csvfile#',1, '#chr(10)##chr(13)#')>
+			<cfif Compare(validHeader, uploadedHeader) NEQ 0>
+				<cfset response.success = 0>
+				<cfset response.message = "Invalid header format.">
+				<cfreturn response>
+			</cfif>
+
+			<cfquery name="qGetEquipmentNames" datasource="#variables.dsn#">
+				SELECT trim(EquipmentName) AS EquipmentName,EquipmentID FROM Equipments WHERE CompanyID = <cfqueryparam value="#session.CompanyID#" cfsqltype="cf_sql_varchar">
+			</cfquery>
+
+			<cfquery name="qGetSalesperson" datasource="#variables.dsn#">
+				SELECT EmployeeID,Name FROM Employees 
+				INNER JOIN Roles ON Roles.RoleID = Employees.RoleID
+				INNER JOIN Offices ON Employees.OfficeID = Offices.OfficeID
+				WHERE Roles.RoleValue IN ('Sales Representative','Manager','Dispatcher','Administrator','Central Dispatcher')
+				AND Offices.CompanyID = <cfqueryparam value="#session.CompanyID#" cfsqltype="cf_sql_varchar">
+				AND Roles.CompanyID = <cfqueryparam value="#session.CompanyID#" cfsqltype="cf_sql_varchar">
+			</cfquery>
+
+			<cfquery name="qGetEmployee" datasource="#variables.dsn#">
+				SELECT Name FROM employees 
+				INNER JOIN Offices ON Employees.OfficeID = Offices.OfficeID
+				WHERE LoginID = <cfqueryparam value="#session.AdminUserName#" cfsqltype="cf_sql_varchar">
+				AND Offices.CompanyID = <cfqueryparam value="#session.CompanyID#" cfsqltype="cf_sql_varchar">
+			</cfquery>
+
+			<cfquery name="qGetUnits" datasource="#variables.dsn#">
+				SELECT UnitName,UnitID FROM Units WHERE CompanyID = <cfqueryparam value="#session.CompanyID#" cfsqltype="cf_sql_varchar">
+			</cfquery>
+
+			<cfquery name="qGetClasses" datasource="#variables.dsn#">
+				SELECT ClassName,ClassID FROM CommodityClasses WHERE CompanyID = <cfqueryparam value="#session.CompanyID#" cfsqltype="cf_sql_varchar">
+			</cfquery>
+
+			<cfset var insStatusTypeID = "">
+			<cfquery name="qGetStatus" datasource="#variables.dsn#">
+				SELECT StatusTypeID FROM LoadStatusTypes WHERE StatusText = '0.1 SPOT' AND CompanyID = <cfqueryparam value="#session.CompanyID#" cfsqltype="cf_sql_varchar">
+			</cfquery>
+
+			<cfif qGetStatus.recordcount>
+				<cfset insStatusTypeID = qGetStatus.StatusTypeID>
+			<cfelse>
+				<cfquery name="qGetStatus" datasource="#variables.dsn#">
+					SELECT newid() AS StatusTypeID
+				</cfquery>
+				<cfset insStatusTypeID = qGetStatus.StatusTypeID>	
+				<cfquery name="qInsStatus" datasource="#variables.dsn#">
+					INSERT INTO LoadStatusTypes(StatusTypeID,StatusOrder,StatusText,StatusType,HasNotes,IsActive,CreatedDateTime,LastModifiedDateTime,CreatedBy,LastModifiedBy,ColorCode,Filter,ForceNextStatus,SystemUpdated,AllowOnMobileWebApp,CompanyID)
+					VALUES(
+						<cfqueryparam value="#insStatusTypeID#" cfsqltype="cf_sql_varchar">
+						,99
+						,'0.1 SPOT'
+						,1
+						,0
+						,1
+						,getdate()
+						,getdate()
+						,<cfqueryparam value="#session.AdminUserName#" cfsqltype="cf_sql_varchar">
+						,<cfqueryparam value="#session.AdminUserName#" cfsqltype="cf_sql_varchar">
+						,'87de78'
+						,1
+						,0
+						,0
+						,0
+						,<cfqueryparam value="#session.CompanyID#" cfsqltype="cf_sql_varchar">
+					)
+
+					UPDATE Roles SET EditableStatuses = EditableStatuses + ',0.1 SPOT' 
+					WHERE CompanyID = <cfqueryparam value="#session.CompanyID#" cfsqltype="cf_sql_varchar"> AND EditableStatuses NOT LIKE '%0.1 SPOT%' AND RoleValue = 'Administrator'
+
+					INSERT INTO agentsLoadTypes VALUES (
+						<cfqueryparam value="#session.EmpID#" cfsqltype="cf_sql_varchar">
+						,<cfqueryparam value="#insStatusTypeID#" cfsqltype="cf_sql_varchar">
+						)
+				</cfquery>
+
+				<cfset session.editablestatuses &= ',0.1 SPOT'>
+			</cfif>
+
+			<!--- <cfset validCustCode = valuelist(qGetCustomerCodes.CustomerCode)> --->
+
+			<cfset currentRow = 1>
+			<cfset bitImportedAll = 1>
+			<cfloop index="row" list="#csvfile#" delimiters="#chr(10)##chr(13)#">
+				<cfif currentRow NEQ 1>
+					<cfset qryRow = CSVToQuery(row)>
+
+					<cfset CarrierFlatRate = ReplaceNoCase(ReplaceNoCase(qryRow.column_1,'$','','ALL'),',','','ALL')>
+					<cfset CustomerFlatRate = ReplaceNoCase(ReplaceNoCase(qryRow.column_2,'$','','ALL'),',','','ALL')>
+
+					<cfif NOT len(trim(CarrierFlatRate))>
+						<cfset CarrierFlatRate = 0>
+					</cfif>
+
+					<cfif NOT len(trim(CustomerFlatRate))>
+						<cfset CustomerFlatRate = 0>
+					</cfif>
+
+					<cfset EquipmentName = qryRow.column_3>
+					<cfif len(trim(qryRow.column_4))>
+						<cfset AgentLoginName = listGetAt(qryRow.column_4, 1)>
+					<cfelse>
+						<cfset AgentLoginName = qryRow.column_4>
+					</cfif>
+					<cfif len(trim(qryRow.column_5))>
+						<cfset DispatcherLoginName = listGetAt(qryRow.column_5, 1)>
+					<cfelse>
+						<cfset DispatcherLoginName = qryRow.column_5>
+					</cfif>
+					<cfset PickupDate= qryRow.column_6>
+					<cfset DeliveryDate = qryRow.column_7>
+					<cfset PRO = qryRow.column_8>
+					<cfset BOL = qryRow.column_9>
+					<cfset PO = qryRow.column_10>
+					<cfset PickupNo = qryRow.column_11>
+					<cfset ShipperName = qryRow.column_12>
+					<cfset ShipperAddress = qryRow.column_13>
+					<cfset ShipperCity = qryRow.column_14>
+					<cfset ShipperState = qryRow.column_15>
+					<cfset ShipperZip = qryRow.column_16>
+					<cfset DeliveryNo = qryRow.column_17>
+					<cfset DestinationName = qryRow.column_18>
+					<cfset DestinationAddress = qryRow.column_19>
+					<cfset DestinationCity = qryRow.column_20>
+					<cfset DestinationState = qryRow.column_21>
+					<cfset DestinationZip = qryRow.column_22>
+					<cfset NewNotes = qryRow.column_23>
+					<cfset NewDispatchNotes = qryRow.column_24>
+					<cfset CarrierNotes = qryRow.column_25>
+
+					<cfset CommodityQty = qryRow.column_26>
+					<cfset CommidityType = qryRow.column_27>
+					<cfset CommodityDescription = qryRow.column_28>
+					<cfset CommodityFee = qryRow.column_29>
+					<cfset CommidityWeight = qryRow.column_30>
+					<cfset CommodityClass= qryRow.column_31>
+					<cfset CommodityCustRate = ReplaceNoCase(ReplaceNoCase(qryRow.column_32,'$','','ALL'),',','','ALL')>
+					<cfset CommidityCarrRate = ReplaceNoCase(ReplaceNoCase(qryRow.column_33,'$','','ALL'),',','','ALL')>
+					<cfset CommodityCustPercent= ReplaceNoCase(qryRow.column_34,'%','','ALL')>
+
+					<cfset LTL = qryRow.column_35>
+
+					<cfif qGetEmployee.recordcount>
+						<cfif len(trim(NewDispatchNotes))>
+							<cfset NewDispatchNotes = '#DateTimeFormat(now(),"m/d/yyyy h:nn tt")# - #qGetEmployee.name# > #NewDispatchNotes#'>
+						</cfif>
+					</cfif>
+					
+					<cfquery dbtype="query" name="qGetEquipmentID">
+						SELECT EquipmentID FROM qGetEquipmentNames WHERE upper(EquipmentName) = upper('#EquipmentName#')
+					</cfquery>
+					
+					<cfquery dbtype="query" name="qGetDispatcherID">
+						SELECT EmployeeID FROM qGetSalesperson WHERE upper(Name) = upper('#DispatcherLoginName#')
+					</cfquery>	
+
+					<cfquery dbtype="query" name="qGetAgentID">
+						SELECT EmployeeID FROM qGetSalesperson WHERE upper(Name) = upper('#AgentLoginName#')
+					</cfquery>
+
+					<cfquery dbtype="query" name="qGetUnitID">
+						SELECT UnitID FROM qGetUnits WHERE upper(UnitName) = upper('#CommidityType#')
+					</cfquery>
+
+					<cfquery dbtype="query" name="qGetClassID">
+						SELECT ClassID FROM qGetClasses WHERE upper(ClassName) = upper('#CommodityClass#')
+					</cfquery>
+
+					<cfquery name="getloadmanual" datasource="#variables.dsn#">
+						SELECT max(loadnumber) + 1 AS loadManualNo FROM Loads WHERE customerid in (select customerid from CustomerOffices inner join offices on CustomerOffices.officeid = offices.officeid where offices.companyid = <cfqueryparam cfsqltype="cf_sql_varchar" value="#session.CompanyID#">)
+					</cfquery>
+					<cfif len(trim(PRO))>
+						<cfset loadManualNo=trim(PRO)>
+					<cfelse>
+						<cfset loadManualNo=getloadmanual.loadManualNo>
+					</cfif>
+					
+					<cfquery name="getLoadID" datasource="#variables.dsn#">
+						SELECT NEWID() AS LoadID 
+					</cfquery>
+
+					<cfquery name="qinsLoad" datasource="#variables.dsn#">
+
+						INSERT INTO Loads
+						(
+							LoadID
+							,LoadNumber
+							,StatusTypeID
+							,CustomerID
+							,custName
+							,CarrFlatRate
+							,CustFlatRate
+							<cfif len(trim(qGetEquipmentID.EquipmentID))>,EquipmentID,EquipmentName</cfif>
+							<cfif len(trim(qGetAgentID.EmployeeID))>,SalesRepID</cfif>
+							,SalesAgent
+							<cfif len(trim(qGetDispatcherID.EmployeeID))>,DispatcherID</cfif>
+							,InternalRef
+							,BOLNum
+							,CustomerPONo
+							,CreatedDateTime
+							,LastModifiedDate
+							,CreatedBy
+							,ModifiedBy
+							<cfif len(trim(PickupDate)) AND isdate(PickupDate)>,NewPickupDate</cfif>
+							<cfif len(trim(DeliveryDate)) AND isdate(DeliveryDate)>,NewDeliveryDate</cfif>
+							,HasEnrouteStops
+							,HasTemp
+							,IsPost
+							,IsPepUpload
+							,IsLocked
+							,TotalCustomerCharges
+							,TotalCarrierCharges
+							,ControlNumber
+							,NEWNOTES
+							,NEWDISPATCHNOTES
+							,ShipperCity
+							,ShipperState
+							,ConsigneeCity
+							,ConsigneeState
+							,CarrierNotes
+							<cfif len(trim(LTL)) AND listFindNoCase("true,false,0,1", LTL)>,IsPartial</cfif>
+						)
+						VALUES 
+						(
+							<cfqueryparam value="#getLoadID.LoadID#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#loadManualNo#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#insStatusTypeID#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#session.CustomerID#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#session.userfullname#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#CarrierFlatRate#" cfsqltype="cf_sql_float">
+							,<cfqueryparam value="#CustomerFlatRate#" cfsqltype="cf_sql_float">
+							<cfif len(trim(qGetEquipmentID.EquipmentID))>
+								,<cfqueryparam value="#qGetEquipmentID.EquipmentID#" cfsqltype="cf_sql_varchar">
+								,<cfqueryparam value="#EquipmentName#" cfsqltype="cf_sql_varchar">
+							</cfif>
+							<cfif len(trim(qGetAgentID.EmployeeID))>,<cfqueryparam value="#qGetAgentID.EmployeeID#" cfsqltype="cf_sql_varchar"></cfif>
+							,<cfqueryparam value="#AgentLoginName#" cfsqltype="cf_sql_varchar">
+							<cfif len(trim(qGetDispatcherID.EmployeeID))>,<cfqueryparam value="#qGetDispatcherID.EmployeeID#" cfsqltype="cf_sql_varchar"></cfif>
+							,<cfqueryparam value="#PRO#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#BOL#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#PO#" cfsqltype="cf_sql_varchar">
+							,getdate()
+							,getdate()
+							,<cfqueryparam value="#session.AdminUserName#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#session.AdminUserName#" cfsqltype="cf_sql_varchar">
+							<cfif len(trim(PickupDate)) AND isdate(PickupDate)>,<cfqueryparam value="#PickupDate#" cfsqltype="cf_sql_varchar"></cfif>
+							<cfif len(trim(DeliveryDate)) AND isdate(DeliveryDate)>,<cfqueryparam value="#DeliveryDate#" cfsqltype="cf_sql_varchar"></cfif>
+							,0
+							,0
+							,0
+							,0
+							,0
+							,<cfqueryparam value="#CustomerFlatRate#" cfsqltype="cf_sql_float">
+							,<cfqueryparam value="#CarrierFlatRate#" cfsqltype="cf_sql_float">
+							,<cfqueryparam value="#loadManualNo#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#NEWNOTES#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#NEWDISPATCHNOTES#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#ShipperCity#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#ShipperState#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#DestinationCity#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#DestinationState#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#CarrierNotes#" cfsqltype="cf_sql_varchar">
+							<cfif len(trim(LTL)) AND listFindNoCase("true,false,0,1", LTL)>,<cfqueryparam value="#LTL#" cfsqltype="cf_sql_varchar"></cfif>
+						)
+					</cfquery>
+
+					<cfquery name="getLoadShipperStopID" datasource="#variables.dsn#">
+						SELECT newid() AS StopID FROM LoadStops
+					</cfquery>	
+
+					<cfquery name="qinsShipperStop" datasource="#variables.dsn#">
+						INSERT INTO LoadStops 
+						(
+							LoadStopID
+							,LoadID
+							,StopNo
+							,LoadType
+							,Address
+							,City
+							,stateCode
+							,postalCode
+							,ReleaseNo
+							<cfif len(trim(PickupDate)) AND isdate(PickupDate)>,StopDate</cfif>
+							,IsOriginPickup
+							,IsFinalDelivery
+							,blind
+							,CreatedDateTime
+							,LastModifiedDate
+							,CreatedBy
+							,ModifiedBy
+							<cfif len(trim(qGetEquipmentID.EquipmentID))>,NewEquipmentID</cfif>
+							,RefNo
+							,TimeIn
+							,TimeOut
+							,StopTime
+							,CustName
+						)
+						VALUES(
+							<cfqueryparam value="#getLoadShipperStopID.StopID#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#getLoadID.LoadID#" cfsqltype="cf_sql_varchar">
+							,0
+							,1
+							,<cfqueryparam value="#ShipperAddress#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#ShipperCity#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#ShipperState#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#ShipperZip#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#PickupNo#" cfsqltype="cf_sql_varchar">
+							<cfif len(trim(PickupDate)) AND isdate(PickupDate)>,<cfqueryparam value="#PickupDate#" cfsqltype="cf_sql_varchar"></cfif>
+							,1
+							,0
+							,0
+							,getdate()
+							,getdate()
+							,<cfqueryparam value="#session.AdminUserName#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#session.AdminUserName#" cfsqltype="cf_sql_varchar">
+							<cfif len(trim(qGetEquipmentID.EquipmentID))>,<cfqueryparam value="#qGetEquipmentID.EquipmentID#" cfsqltype="cf_sql_varchar"></cfif>
+							,''
+							,''
+							,''
+							,''
+							,<cfqueryparam value="#ShipperName#" cfsqltype="cf_sql_varchar">
+						)
+					</cfquery>
+
+					<cfquery name="qinsConsigneeStop" datasource="#variables.dsn#">
+						INSERT INTO LoadStops 
+						(
+							LoadStopID
+							,LoadID
+							,StopNo
+							,LoadType
+							,Address
+							,City
+							,stateCode
+							,postalCode
+							,ReleaseNo
+							<cfif len(trim(DeliveryDate)) AND isdate(DeliveryDate)>,StopDate</cfif>
+							,IsOriginPickup
+							,IsFinalDelivery
+							,blind
+							,CreatedDateTime
+							,LastModifiedDate
+							,CreatedBy
+							,ModifiedBy
+							<cfif len(trim(qGetEquipmentID.EquipmentID))>,NewEquipmentID</cfif>
+							,RefNo
+							,TimeIn
+							,TimeOut
+							,StopTime
+							,CustName
+						)
+						VALUES(
+							newid()
+							,<cfqueryparam value="#getLoadID.LoadID#" cfsqltype="cf_sql_varchar">
+							,0
+							,2
+							,<cfqueryparam value="#DestinationAddress#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#DestinationCity#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#DestinationState#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#DestinationZip#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#DeliveryNo#" cfsqltype="cf_sql_varchar">
+							<cfif len(trim(DeliveryDate)) AND isdate(DeliveryDate)>,<cfqueryparam value="#DeliveryDate#" cfsqltype="cf_sql_varchar"></cfif>
+							,0
+							,1
+							,0
+							,getdate()
+							,getdate()
+							,<cfqueryparam value="#session.AdminUserName#" cfsqltype="cf_sql_varchar">
+							,<cfqueryparam value="#session.AdminUserName#" cfsqltype="cf_sql_varchar">
+							<cfif len(trim(qGetEquipmentID.EquipmentID))>,<cfqueryparam value="#qGetEquipmentID.EquipmentID#" cfsqltype="cf_sql_varchar"></cfif>
+							,''
+							,''
+							,''
+							,''
+							,<cfqueryparam value="#DestinationName#" cfsqltype="cf_sql_varchar">
+						)
+					</cfquery>
+
+
+					<cfquery name="newLoadStopComm" datasource="#variables.dsn#">
+						INSERT INTO LoadStopCommodities
+						(
+							LoadStopID
+							,Weight
+							,Qty
+							,Description
+							,SrNo
+							,CustCharges
+							,CarrCharges
+							,CustRate
+							,CarrRate
+							,CarrRateOfCustTotal 
+							<cfif listFind("0,1", CommodityFee)>,Fee</cfif>
+							<cfif qGetUnitID.recordcount>,UnitID</cfif>
+							<cfif qGetClassID.recordcount>,ClassID</cfif>
+						)
+						VALUES(
+							<cfqueryparam value="#getLoadShipperStopID.StopID#" cfsqltype="cf_sql_varchar">
+							,<cfif isnumeric(CommidityWeight)><cfqueryparam value="#CommidityWeight#" cfsqltype="cf_sql_varchar"><cfelse>0</cfif>
+							,<cfif isnumeric(CommodityQty)><cfqueryparam value="#CommodityQty#" cfsqltype="cf_sql_varchar"><cfelse>1</cfif>
+							,<cfqueryparam value="#CommodityDescription#" cfsqltype="cf_sql_varchar">
+							,'1'
+							,<cfif isnumeric(CommodityCustRate)><cfqueryparam value="#CommodityCustRate#" cfsqltype="cf_sql_varchar"><cfelse>0</cfif>
+							,<cfif isnumeric(CommidityCarrRate)><cfqueryparam value="#CommidityCarrRate#" cfsqltype="cf_sql_varchar"><cfelse>0</cfif>
+							,<cfif isnumeric(CommodityCustRate)><cfqueryparam value="#CommodityCustRate#" cfsqltype="cf_sql_varchar"><cfelse>0</cfif>
+							,<cfif isnumeric(CommidityCarrRate)><cfqueryparam value="#CommidityCarrRate#" cfsqltype="cf_sql_varchar"><cfelse>0</cfif>
+							,<cfif isnumeric(CommodityCustPercent)><cfqueryparam value="#CommodityCustPercent#" cfsqltype="cf_sql_varchar"><cfelse>0</cfif>
+							<cfif listFind("0,1", CommodityFee)>,<cfqueryparam value="#CommodityFee#" cfsqltype="cf_sql_varchar"></cfif>
+							<cfif qGetUnitID.recordcount>,<cfqueryparam value="#qGetUnitID.UnitID#" cfsqltype="cf_sql_varchar"></cfif>
+							<cfif qGetClassID.recordcount>,<cfqueryparam value="#qGetClassID.ClassID#" cfsqltype="cf_sql_varchar"></cfif>
+						)
+					</cfquery>
+					<cfset logMsg = "Imported load:#loadManualNo#(Row Number:#currentRow#).">
+					<cfquery name="qInsLog" datasource="#variables.dsn#">
+						INSERT INTO CsvImportLog (LogId,Message,CreatedDate,Success,RowData,LoadNumber,CompanyID)
+						VALUES(newid(),<cfqueryparam value="#logMsg#" cfsqltype="cf_sql_varchar">,getdate(),1,<cfqueryparam value="#row#" cfsqltype="cf_sql_varchar">,<cfqueryparam value="#loadManualNo#" cfsqltype="cf_sql_varchar">,<cfqueryparam value="#session.CompanyID#" cfsqltype="cf_sql_varchar">)
+					</cfquery>
+				</cfif>	
+				<cfset currentRow++>
+			</cfloop>
+			<cfset response.success = 1>
+			<cfif bitImportedAll EQ 0>
+				<cfset response.message = "Some rows are not imported.">
+			<cfelse>
+				<cfset response.message = "Loads imported successfully.">
+			</cfif>
+			<cfreturn response>
+			<cfcatch>
+				<cfquery name="qInsLog" datasource="#variables.dsn#">
+					INSERT INTO CsvImportLog (LogId,Message,CreatedDate,Success,RowData,CompanyID)
+					VALUES(newid(),<cfqueryparam value="#cfcatch.message##cfcatch.detail#" cfsqltype="cf_sql_varchar">,getdate(),0,<cfqueryparam value="#row#" cfsqltype="cf_sql_varchar">,<cfqueryparam value="#session.CompanyID#" cfsqltype="cf_sql_varchar">)
+				</cfquery>
+
+				<cfset response.success = 0>
+				<cfset response.message = "Something went wrong. Please contact support.">
+				<cfreturn response>
+			</cfcatch>
+		 </cftry>
+	</cffunction>
 </cfcomponent>

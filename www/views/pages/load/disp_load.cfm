@@ -160,8 +160,11 @@ $(document).ready(function(){
 
 		//var path = urlComponentPath+"loadgateway.cfc?method=uploadCSV&createdBy=#session.AdminUserName#&CompanyID=#session.CompanyID#";
 
-		var path = "ajax.cfm?event=uploadCSV&#session.URLToken#";
-
+		<cfif structKeyExists(session, "IsCustomer")>
+			var path = "ajax.cfm?event=uploadCSVCustomer&#session.URLToken#";
+		<cfelse>
+			var path = "ajax.cfm?event=uploadCSV&#session.URLToken#";
+		</cfif>
 		$.ajax({
 		    url: path,
             type: "POST",

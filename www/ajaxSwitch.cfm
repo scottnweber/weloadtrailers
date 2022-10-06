@@ -15,6 +15,11 @@
 		<cfoutput>#serializeJSON(response)#</cfoutput>
 	</cfcase>
 
+	<cfcase value="uploadCSVCustomer">
+		<cfinvoke component="#variables.objloadGatewayNew#" method="uploadCSVCustomer" returnvariable="response" /> 
+		<cfoutput>#serializeJSON(response)#</cfoutput>
+	</cfcase>
+
 	<cfcase value="AddCityStateRecord">
 		<cfinvoke component="#variables.objAgentGateway#" method="AddCityStateRecord" frmStruct="#form#" returnvariable="response" /> 
 		<cfoutput>#serializeJSON(response)#</cfoutput>
