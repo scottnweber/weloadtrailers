@@ -1,4 +1,22 @@
 <cfoutput>
+<style type="text/css">
+	.login-bg{
+		background: none;
+		border: solid 2px ##ccd5ff;
+	}
+	.login-title{
+		border-bottom: solid 2px ##ccd5ff;
+		width: auto;
+		padding-bottom: 15px;
+	}
+	.login-bg form fieldset{
+		margin-top: 20px;
+		margin-bottom: 10px;
+	}
+	.login-bg form fieldset label.fpass{
+		font-size: 10px;
+	}
+</style>
 <script language="JavaScript1.2" type="text/javascript">
 	function Validation(objForm) {
 		if(objForm.txtCompanyCode.value == "") {
