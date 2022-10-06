@@ -35,7 +35,7 @@
 	
 </script>
 
-<div class="login-bg">
+<div class="login-bg" style="height: 200px;">
 <div class="login-title">Customer Login</div>
 <form action="index.cfm?event=Customerlogin:process&#Session.URLToken#&reinit=true" method="post" name="frmLogin" id="frmLogin" onSubmit="JavaScript: return Validation(this)" autocomplete="off">
 	<cfif IsDefined("URL.AlertMessageID") And IsDefined("Session.Passport.LoginError") And URL.AlertMessageID EQ 1>
