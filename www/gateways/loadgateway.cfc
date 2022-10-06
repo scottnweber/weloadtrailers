@@ -6034,7 +6034,7 @@
 			<cfset arguments.StartDate = dtMonthStart>
 			<cfset arguments.enddate = dtMonthEnd>
 		</cfif>
-		<cfif listFindNoCase("LoadManagerLive,weloadtrailers", activedsn)><!--- Beta version --->
+		<cfif NOT listFindNoCase("LoadManagerLive,weloadtrailers", activedsn)><!--- Beta version --->
 			<cfset var LoadListProcName = "USP_GetLoadListBETA">
 			<cfset arguments.sortBy = replaceNoCase(arguments.sortBy, "statusorder", "lst.statusorder")>
 			<cfset arguments.sortBy = replaceNoCase(arguments.sortBy, "StatusDescription", "lst.StatusDescription")>
