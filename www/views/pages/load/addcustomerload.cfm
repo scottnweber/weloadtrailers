@@ -18,9 +18,6 @@
     <cfinvoke component="#variables.objcustomerloadGateway#" method="GetCustomerLoadCopy" LoadID="#url.loadToBeCopied#" returnvariable="request.qLoad">
 <cfelse>
     <cfinvoke component="#variables.objcustomerloadGateway#" method="GetCustomerLoad" LoadID="#url.LoadID#" returnvariable="request.qLoad">
-    <cfif (len(trim(request.qLoad.StatusText)) AND trim(request.qLoad.StatusText) NEQ '0.1 EDI')>
-        <cfset viewCopyOnly = 1>
-    </cfif>
 </cfif>
 
 <cfinvoke component="#variables.objloadGateway#" method="getloadAttachedFiles" linkedid="#url.loadID#" fileType="1" returnvariable="request.filesAttached" />
