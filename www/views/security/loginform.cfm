@@ -135,7 +135,7 @@
 		<h3 class="text-bold" style="color:##880015;font-weight:bold;fontsize:15px; margin-left: -391px;">PAYMENT DUE :</h3>
 		<h4 style="text-align: justify;color:##3f48cc;font-size:13px;">#qPaymentDue.Message#</h4>
 </cfif>
-		<div class="login-bg" <cfif structKeyExists(session, "PaymentExpired") AND Session.PaymentExpired EQ 1 >style="margin-top:3% !important;margin-bottom:2% !important;"</cfif>>
+		<div class="login-bg" <cfif structKeyExists(session, "PaymentExpired") AND Session.PaymentExpired EQ 1 >style="margin-top:3% !important;margin-bottom:2% !important;"</cfif> style="height: 200px;">
 			<div class="login-title">Login<cfif listFirst(cgi.SCRIPT_NAME,'/') EQ 'LoadManagerBeta'><sup> BETA</sup></cfif></div>
 			<form action="index.cfm?event=login:process&#Session.URLToken#&reinit=true" method="post" name="frmLogin" id="frmLogin" onSubmit="JavaScript: return Validation(this)" autocomplete="off">
 				<cfif IsDefined("URL.AlertMessageID") And IsDefined("Session.Passport.LoginError") And URL.AlertMessageID EQ 1>
@@ -150,9 +150,7 @@
 					<div class="msg-area" style="width:360px;color:red;">Invalid Company Code.</div>
 				</cfif>
 				<fieldset>
-				<label class="user">Company Code:</label>
-				<input type="text" id="txtCompanyCode" name="txtCompanyCode" class="field" autocomplete="on" value="<cfif isDefined("Cookie") and isStruct(Cookie) and structKeyExists(Cookie, "CompanyCode")>#Cookie.CompanyCode#</cfif>">
-				<div class="clear"></div>
+				<input type="hidden" id="txtCompanyCode" name="txtCompanyCode" value="weloadtrailers">
 				<label class="user">Username: </label>
 				<input type="text" id="txtUserName" name="txtUsername" class="field">
 				<div class="clear"></div>
@@ -177,7 +175,6 @@
 				<label class="user">&nbsp;</label>
 				
 				<div style="float: left;width: 140px;">
-					<label class="fpass"><a  href="index.cfm?event=lostCompanyCode&#Session.URLToken#">Forgot your Company Code?</a></label>
 					<label class="fpass"><a  href="index.cfm?event=lostUserName&#Session.URLToken#">Forgot your Username?</a></label>
 					<label class="fpass"><a  href="index.cfm?event=lostPassword&#Session.URLToken#">Forgot your Password?</a></label>
 				</div>

@@ -44,9 +44,7 @@
 		<div class="msg-area" style="width:360px;color:red;">Session has expired</div>
 	</cfif>
 	<fieldset>
-	<label class="user">Company Code:</label>
-	<input type="text" id="txtCompanyCode" name="txtCompanyCode" class="field">
-	<div class="clear"></div>
+	<input type="hidden" id="txtCompanyCode" name="txtCompanyCode" value="weloadtrailers">
 	<label class="user">Username:</label>
 	<input type="text" id="UserName" name="Username" class="field">
 	<div class="clear"></div>
