@@ -7696,7 +7696,7 @@
 					</cfquery>
 
 					<cfquery name="getLoadShipperStopID" datasource="#variables.dsn#">
-						SELECT newid() AS StopID FROM LoadStops
+						SELECT newid() AS StopID
 					</cfquery>	
 
 					<cfquery name="qinsShipperStop" datasource="#variables.dsn#">
@@ -7857,6 +7857,7 @@
 			</cfif>
 			<cfreturn response>
 			<cfcatch>
+				<cfdump var="#cfcatch#"><cfabort>
 				<cfquery name="qInsLog" datasource="#variables.dsn#">
 					INSERT INTO CsvImportLog (LogId,Message,CreatedDate,Success,RowData,CompanyID)
 					VALUES(newid(),<cfqueryparam value="#cfcatch.message##cfcatch.detail#" cfsqltype="cf_sql_varchar">,getdate(),0,<cfqueryparam value="#row#" cfsqltype="cf_sql_varchar">,<cfqueryparam value="#session.CompanyID#" cfsqltype="cf_sql_varchar">)
