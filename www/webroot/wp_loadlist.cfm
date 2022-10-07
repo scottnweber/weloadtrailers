@@ -14,7 +14,6 @@
 	,carrierNotes
 	,L.totalmiles as carriertotalmiles
 	FROM Loads L
-	WHERE L.StatusTypeID = '5453B3D0-9CDE-4953-9054-FC7B3ED7B7C6'
 </cfquery>
 <cfoutput>
 	<style>
