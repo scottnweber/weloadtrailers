@@ -240,6 +240,11 @@
             cursor: pointer;
         }
     </style>
+    <cfif structkeyexists(url,"loadid") and len(trim(url.loadid)) gt 1>
+        <div class="delbutton" style="float: none;width: 852px;text-align: right;padding: 0;">
+            <a href="index.cfm?event=load&loadid=#url.loadID#&#session.URLToken#" onclick="return confirm('Are you sure to delete this load?');">  Delete</a>
+        </div>
+    </cfif>
     <div class="white-con-area" style="height: 40px;background-color: ##82bbef;">
         <div style="float: left; min-height: 40px; width: 43%;" id="divUploadedFiles">
             <cfif len(trim(url.loadid)) and viewCopyOnly EQ 0>
