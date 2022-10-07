@@ -805,7 +805,9 @@
 					<cfset structToDump.CurrentSiteUser = Session.Passport.CurrentSiteUser.dump() />
 				</cfif>
 			</cfif>
-			<script type="text/javascript" nonce="#ToBase64("LoadManagerLive")#" src="https://desk.zoho.com/portal/api/web/inapp/133848000009815001?orgId=569278284" defer></script>
+			<cfif structKeyExists(session, "currentusertype") AND session.currentusertype EQ "Administrator">
+				<script type="text/javascript" nonce="#ToBase64("LoadManagerLive")#" src="https://desk.zoho.com/portal/api/web/inapp/133848000009815001?orgId=569278284" defer></script>
+			</cfif>
 		</body>
 	</html>
 	<cfif (isdefined("url.loadid") and len(trim(url.loadid)) gt 1) OR (isdefined("url.loadToBeCopied") and len(trim(url.loadToBeCopied)) gt 1)>

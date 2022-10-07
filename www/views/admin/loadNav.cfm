@@ -251,7 +251,9 @@
 <cfif structKeyExists(session, "empid") and len(trim(session.empid))>
 	<div style="float:right;margin-right: -100px;margin-top: -59px;"><a href="index.cfm?event=feedback&#Session.URLToken#"><img src="images/support.png" width="100px" border="0"></a></div>
 </cfif>
-<div style="float:right;margin-top: -77px;"><a href="javascript:void(0);" onclick="window.open('index.cfm?event=postNote&#session.URLToken#','Map','height=600,width=800');"><img src="images/postedNoteIcon.png" width="100px" border="0"></a></div>
+<cfif structKeyExists(session, "currentusertype") AND session.currentusertype EQ "Administrator">
+	<div style="float:right;margin-top: -77px;"><a href="javascript:void(0);" onclick="window.open('index.cfm?event=postNote&#session.URLToken#','Map','height=600,width=800');"><img src="images/postedNoteIcon.png" width="100px" border="0"></a></div>
+</cfif>
 <div class="dialog">
 	<p class="dialogTitle"></p>
 	<img width="10px" style="float:right;cursor: pointer;margin-right: 10px;margin-top: 5px;" src="images/close.gif" onClick="window.location.reload();">
