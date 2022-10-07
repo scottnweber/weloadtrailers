@@ -160,11 +160,8 @@ $(document).ready(function(){
 
 		//var path = urlComponentPath+"loadgateway.cfc?method=uploadCSV&createdBy=#session.AdminUserName#&CompanyID=#session.CompanyID#";
 
-		<cfif structKeyExists(session, "IsCustomer")>
-			var path = "ajax.cfm?event=uploadCSVCustomer&#session.URLToken#";
-		<cfelse>
-			var path = "ajax.cfm?event=uploadCSV&#session.URLToken#";
-		</cfif>
+		var path = "ajax.cfm?event=uploadCSV&#session.URLToken#";
+
 		$.ajax({
 		    url: path,
             type: "POST",
@@ -1569,7 +1566,7 @@ function showfullmap(loadid) {
 						<th align="center" valign="middle" class="head-bg statusWrap" onclick="sortTableBy('StatusDescription','dispLoadForm');">STATUS</th>
 					</cfcase>
 					<cfcase value="Customer">
-						<th align="center" valign="middle" class="head-bg custWrap" onclick="sortTableBy('CustName','dispLoadForm');">CUSTOMER</th>
+						<th align="center" valign="middle" class="head-bg custWrap" onclick="sortTableBy('CustName','dispLoadForm');"><cfif structKeyExists(session, "currentusertype") AND session.currentusertype EQ "Administrator">CUSTOMER<cfelse>BROKER</cfif></th>
 					</cfcase>
 					<cfcase value="Po##">
 						<th align="center" valign="middle" class="head-bg poWrap" onclick="sortTableBy('CustomerPONo','dispLoadForm');">PO##</th>

@@ -466,7 +466,7 @@ function openTab(url){
 <cfelse>
 <cfset tempLoadId = #createUUID()#>
 <cfset session.checkUnload ='add'>
-<h1>Add New Customer</h1>
+<h1>Add New <cfif structKeyExists(session, "currentusertype") AND session.currentusertype EQ "Administrator">Customer<cfelse>Broker</cfif></h1>
 	<div style="float:right;margin-right: 151px;margin-top: -10px;">
 		<div style="float:left;">
 			<input id="mailDocLink" <cfif mailsettings>data-allowmail="true"<cfelse>data-allowmail="false"</cfif> style="width:110px !important;" type="button" class="bttn"value="Email Doc" />
@@ -486,7 +486,7 @@ function openTab(url){
 <div class="white-con-area" style="height: 36px;background-color: ##82bbef;margin-top: 19px;">
 	<div style="float: left; width: 40%;" id="divUploadedFiles">
 	</div>
-	<div style="float: left; width: 60%;"><h2 style="color:white;font-weight:bold;">Customer Information</h2></div>
+	<div style="float: left; width: 60%;"><h2 style="color:white;font-weight:bold;"><cfif structKeyExists(session, "currentusertype") AND session.currentusertype EQ "Administrator">Customer<cfelse>Broker</cfif> Information</h2></div>
 </div>
 </cfif>
 <cfif isdefined("message") and len(message)>

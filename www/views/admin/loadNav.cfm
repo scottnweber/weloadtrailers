@@ -155,7 +155,7 @@
 		});
 	</script>
 	<table class="below-navleft" style="border-collapse:collapse; border:none; width:890px;" border="0" cellpadding="0" cellspacing="0">
-	<cfif Not structKeyExists(session, "IsCustomer")>
+	<cfif structKeyExists(session, "currentusertype") AND session.currentusertype EQ "Administrator">
 		<td>
 			<a href="index.cfm?event=load&#session.URLToken#" <cfif (event is 'load' or event is 'addload:process' or event is 'myload' or event is 'myloadnew') AND NOT  structKeyExists(url, "Pending")> class="active" </cfif>>All Loads</a>
 			</td>
@@ -225,18 +225,27 @@
 				<a href="index.cfm?event=addcustomerload&#session.URLToken#" <cfif event is 'addcustomerload'> class="active" </cfif>>Add Load</a>
 			</td>  
 		</tr>
+	<cfelse>
+		<td>
+			<cfif request.qSystemOptions.LowVolumePlan EQ 1>
+				<cfset addLoadUrl = "javascript:checkLoadLimit();">
+			<cfelse>
+				<cfset addLoadUrl = "index.cfm?event=addload&#session.URLToken#">
+			</cfif>
+			<a href="#addLoadUrl#" <cfif listFindNoCase("addload,BOLReport", event)> class="active" </cfif>>Add Load</a>
+		</td> 
 	</cfif>
 	</table>
 
 
 <div class="below-navright" id="helpLink" style="padding-top: 4px;width: 30px;">
 </div>
-<cfif listFindNoCase("load,myLoad", event) and request.qSystemOptions.LowVolumePlan EQ 0>
-	<div style="float: right;margin-right: <cfif structKeyExists(session, "IsCustomer")>-250px<cfelse>-362px</cfif>;margin-top: -33px;">
+<cfif listFindNoCase("load,myLoad", event) and not structKeyExists(session, "IsCustomer") and request.qSystemOptions.LowVolumePlan EQ 0>
+	<div style="float: right;margin-right: -362px;margin-top: -33px;">
 		<strong>Import Loads Via CSV:</strong><br>
 	    <input type="file" id="importCSV"><br>
 	    <a style="text-decoration: underline;" href="https://desk.zoho.com/portal/loadmanager/en/kb/articles/upload-record-to-load-manager" target="_blank">Instructions</a><br>
-	    <a style="text-decoration: underline;" href="../../../LoadManagerAdmin/LoadsImportSampleFile<cfif structKeyExists(session, "IsCustomer")>Customer</cfif>.csv"  download>Download Sample File</a>
+	    <a style="text-decoration: underline;" href="../../../LoadManagerAdmin/LoadsImportSampleFile.csv"  download>Download Sample File</a>
 	</div>		
 </cfif>
 <cfif structKeyExists(session, "empid") and len(trim(session.empid))>

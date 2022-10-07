@@ -642,7 +642,7 @@
 											</table>
 											<table class="navigation <cfif structKeyExists(url,"event") AND (url.event EQ "load" OR  url.event EQ "myLoad" OR  url.event EQ "carrierquotes" OR  url.event EQ "AIImport")>marginLeft3</cfif>" style="border-collapse:collapse; border:none;width:1050px !important;" border="0" cellpadding="0" cellspacing="0">
 												<tr>
-													<cfif Not structKeyExists(session, "IsCustomer")>
+													<cfif structKeyExists(session, "currentusertype") AND session.currentusertype EQ "Administrator">
 														<td><a href="index.cfm?event=myLoad&#Session.URLToken#" <cfif event is 'Myload'> class="active" </cfif>>My Loads</a></td>
 														<cfif ListContains(session.rightsList,'addEditDeleteAgents',',')>
 															<cfset agentUrl = "index.cfm?event=agent&sortorder=asc&sortby=Name&#Session.URLToken#">
@@ -697,7 +697,7 @@
 															</td>
 														</cfif>																
 														
-													</cfif>
+													<!--- </cfif> --->
 													<td style="width:55px;"><cfif qEDI204PendingLoads.recordcount  gt 0>
 																		<a href="index.cfm?event=EDILoads&#Session.URLToken#">
 																			<span class="unReadMessage">
@@ -705,7 +705,7 @@
 																			</span>
 																		</a>
 																	</cfif><a href="index.cfm?event=load&#Session.URLToken#" <cfif event is 'load' or event is 'addload:process' or event is 'unit' or event is 'class' or event is 'addload' or event is 'addcustomerload' or event is 'addunit:process' or event is 'addunit' or event is 'addclass:process' or event is 'addclass' or event is 'advancedsearch' or event is 'Factoring' or event is 'addFactoring' or event is 'AIImport' or event is 'AIImportLoad' or event is 'quickRateAndMilesCalc' or event is 'BOLReport' or event is 'UploadCustomerPayment'> class="active" </cfif>>All Loads</a></td>
-													<cfif Not structKeyExists(session, "IsCustomer")>
+													<!--- <cfif Not structKeyExists(session, "IsCustomer")> --->
 														
 														
 														<td><a href="index.cfm?event=myLoadNew&#Session.URLToken#" <cfif event is 'myLoadNew'> class="active" </cfif>>Dispatch Board</a></td>
@@ -732,12 +732,20 @@
 															</cfif>
 															<a href="#logUrl#" <cfif listFindNoCase("loadLogs,EDILog,Project44Log,EmailLog,TextLog,EdispatchLog,CsvImportLog,CarrierCsvImportLog,CustomerCsvImportLog,EquipmentCsvImportLog", event)> class="active" </cfif>>Logs</a></td>
 														<td><a href="#sysSetupUrl#" <cfif listFind('systemsetup,companyinfo,loadstatussetup,crmNoteTypes,attachmentTypes,addCRMNoteType,addAttachmentType,OnboardCarrierDocs,AddOnBoardingDoc,OnboardSetting,OnboardEquipments,DocsTobeAttached,BillFromCompanies,AddBillFromCompany,userRoles', event)> class="active" </cfif>>Settings</a></td>
+													<!--- </cfif> --->
+														<cfif request.qSystemSetupOptions1.AccountingIntegration EQ 1 AND ListContains(session.rightsList,'Accounting',',')>
+															<td style="width: 64px;"><a href="index.cfm?event=InvoiceLoads&#Session.URLToken#" <cfif listFindNoCase("InvoiceLoads,CustomerPayments,CreateCustomerInvoice,LMACustomerAgingReport,LMACustomerStatementReport,LMAPrintCashReceipts,CustomerInquiry,InvoiceCarrierLoads,CreateVendorInvoice,InvoiceToPay,PrintChecks,LMAVendorAgingReport,LMAInvoicesPickedtoPay,VendorInquiry,PostInvoicePayment,VoidInvoicePayment,ListChartofAccounts,ChartofAccounts,FindGLTransactions,BankAccounts,LMAPrintTrialBalance,LMAPrintIncomeStatement,LMAPrintBalanceSheet,JournalEntry,PostJournalEntry,Departments,AccountDepartments,LMAPrintLedgerReport,LMASettings,PaymentTerms,addLMAPaymentTerms,GeneralLedgerFinancialSetup,GeneralLedgerBalanceSheetSetup,OpenNewYear,GLRecalculate,VoidCustomerPayment", event)> class="active" </cfif>>Accounting</a></td>
+														</cfif>
+														<td class="nobg"><a id="logout" href="index.cfm?event=logout:process&#Session.URLToken#">Logout</a></td>
+													<cfelse>
+														<td style="width:55px;">
+															<a href="index.cfm?event=load&#Session.URLToken#" <cfif listFindNoCase("load,addload", event)> class="active" </cfif>>All Loads</a>
+														</td>
+														<td>
+															<a href="index.cfm?event=customer&#Session.URLToken#" <cfif listFindNoCase("customer,addcustomer", event)> class="active" </cfif>>Brokers</a>
+														</td>
+														<td class="nobg"><a id="logout" href="index.cfm?event=logout:process&#Session.URLToken#">Logout</a></td>
 													</cfif>
-													<cfif request.qSystemSetupOptions1.AccountingIntegration EQ 1 AND ListContains(session.rightsList,'Accounting',',')>
-														<td style="width: 64px;"><a href="index.cfm?event=InvoiceLoads&#Session.URLToken#" <cfif listFindNoCase("InvoiceLoads,CustomerPayments,CreateCustomerInvoice,LMACustomerAgingReport,LMACustomerStatementReport,LMAPrintCashReceipts,CustomerInquiry,InvoiceCarrierLoads,CreateVendorInvoice,InvoiceToPay,PrintChecks,LMAVendorAgingReport,LMAInvoicesPickedtoPay,VendorInquiry,PostInvoicePayment,VoidInvoicePayment,ListChartofAccounts,ChartofAccounts,FindGLTransactions,BankAccounts,LMAPrintTrialBalance,LMAPrintIncomeStatement,LMAPrintBalanceSheet,JournalEntry,PostJournalEntry,Departments,AccountDepartments,LMAPrintLedgerReport,LMASettings,PaymentTerms,addLMAPaymentTerms,GeneralLedgerFinancialSetup,GeneralLedgerBalanceSheetSetup,OpenNewYear,GLRecalculate,VoidCustomerPayment", event)> class="active" </cfif>>Accounting</a></td>
-													</cfif>
-													<td class="nobg"><a id="logout" href="index.cfm?event=logout:process&#Session.URLToken#">Logout</a></td>
-													
 												</tr>
 											</table>
 									 

@@ -18,6 +18,9 @@
     <cfinvoke component="#variables.objcustomerloadGateway#" method="GetCustomerLoadCopy" LoadID="#url.loadToBeCopied#" returnvariable="request.qLoad">
 <cfelse>
     <cfinvoke component="#variables.objcustomerloadGateway#" method="GetCustomerLoad" LoadID="#url.LoadID#" returnvariable="request.qLoad">
+    <cfif (len(trim(request.qLoad.StatusText)) AND trim(request.qLoad.StatusText) NEQ '0.1 EDI')>
+        <cfset viewCopyOnly = 1>
+    </cfif>
 </cfif>
 
 <cfinvoke component="#variables.objloadGateway#" method="getloadAttachedFiles" linkedid="#url.loadID#" fileType="1" returnvariable="request.filesAttached" />
@@ -277,24 +280,6 @@
                 <div class="form-con" style="width: 225px;">
                     
                     <fieldset>
-                        <label class="space_it">Dispatcher</label>
-                        <select id="Dispatcher" name="Dispatcher" class="medium" style="width:130px;background-color: ##e3e3e3;pointer-events: none;">
-                            <option value="">Select</option>
-                            <cfloop query="request.qSalesPerson">
-                                <option value="#request.qSalesPerson.EmployeeID#" <cfif request.qSalesPerson.EmployeeID EQ request.qLoad.DispatcherID> selected </cfif>>#request.qSalesPerson.Name#</option>
-                            </cfloop>
-                        </select>
-                        <div class="clear"></div>
-                        <cfif listFindNoCase("1,2", request.qSystemSetupOptions.freightBroker)>
-                            <label class="space_it">Sales Rep</label>
-                            <select id="Salesperson" name="Salesperson" class="medium" style="width:130px;background-color: ##e3e3e3;pointer-events: none;">
-                                <option value="">Select</option>
-                                <cfloop query="request.qSalesPerson">
-                                    <option value="#request.qSalesPerson.EmployeeID#" <cfif request.qSalesPerson.EmployeeID EQ request.qLoad.SalesRepID> selected </cfif>>#request.qSalesPerson.Name#</option>
-                                </cfloop>
-                            </select>
-                            <div class="clear"></div>
-                        </cfif>
                         <label class="space_it">Equip/L x W</label>
                         <select id="equipment" name="equipment" class="medium" style="width:70px;"  onchange="settemperaturescale()">
                             <option value="" data-temperature="" data-temperaturescale="">Select</option>
@@ -344,13 +329,13 @@
                 <div class="white-con-area">
                     <div class="white-con-area" style="height: 36px;background-color: ##82bbef;">
                         <div style="padding: 0 18px;overflow:hidden;">
-                            <h2 style="color:white;font-weight:bold;float: left;">Customer</h2>
+                            <h2 style="color:white;font-weight:bold;float: left;">Broker</h2>
                         </div>
                     </div>
                 </div>
                 <div class="form-con">
                     <fieldset>
-                        <label style="width: 75px;">Customer Info</label>
+                        <label style="width: 75px;">Broker Info</label>
                         <div id="CustInfoNew">
                             <input type="hidden" name="CustomerID" value="#request.qLoad.CustomerID#">
                             <input type="hidden" name="CustomerName" value="#request.qLoad.CustName#">

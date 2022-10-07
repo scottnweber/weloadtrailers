@@ -50,7 +50,7 @@
   <cfif structKeyExists(url, "pending")>
     <h1>Customers with missing <a target="_blank" style="text-decoration: underline;" href="index.cfm?event=attachmentTypes&#session.URLToken#">Attachments</a></h1>
   <cfelse>
-    <h1>All Customers</h1>
+    <h1>All <cfif structKeyExists(session, "currentusertype") AND session.currentusertype EQ "Administrator">Customers<cfelse>Brokers</cfif></h1>
   </cfif>
 <div style="clear:left"></div>
 

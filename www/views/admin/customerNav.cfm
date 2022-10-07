@@ -35,17 +35,21 @@
 </style>
 <div class="below-navleft" style="width:890px;">
 	<ul>
-		<li><a href="index.cfm?event=customer&#session.URLToken#" <cfif (event is 'customer' or event is 'addcustomer:process') and not structKeyExists(url,'payer') and not structKeyExists(url, "Pending")> class="active" </cfif>>Payers/Shippers/Consignees</a></li>
-		<li><a href="index.cfm?event=add<cfif request.qGetSystemSetupOptions.autoAddCustViaDOT EQ 1>new</cfif>customer&#session.URLToken#" <cfif listFind("addcustomer,addnewcustomer,CRMNotes,stop,addstop,CustomerContacts,addCustomerContact", event)> class="active" </cfif>>Add Customer</a></li>
-		<li><a href="index.cfm?event=customer&#session.URLToken#&payer=1" <cfif event is 'customer' and structKeyExists(url,'payer') and url.payer is '1'> class="active" </cfif>>Payers</a></li>
-		<li><a href="index.cfm?event=customer&#session.URLToken#&payer=0" <cfif event is 'customer' and structKeyExists(url,'payer') and url.payer is '0'> class="active" </cfif>>Shippers/Consignees</a></li>
-		<cfif request.qGetSystemSetupOptions.TurnOnConsolidatedInvoices>
-			<li><a href="index.cfm?event=createconsolidatedinvoices&#session.URLToken#" <cfif event is 'createconsolidatedinvoices'> class="active" </cfif>>Create Consolidated Invoices</a></li>
-			<li><a href="index.cfm?event=consolidatedinvoicequeue&#session.URLToken#" <cfif	listFindNoCase("consolidatedinvoicequeue,editconsolidatedinvoicequeue", event)> class="active" </cfif>>Consolidated Invoice Queue</a></li>
+		<cfif structKeyExists(session, "currentusertype") AND session.currentusertype EQ "Administrator">
+			<li><a href="index.cfm?event=customer&#session.URLToken#" <cfif (event is 'customer' or event is 'addcustomer:process') and not structKeyExists(url,'payer') and not structKeyExists(url, "Pending")> class="active" </cfif>>Payers/Shippers/Consignees</a></li>
+			<li><a href="index.cfm?event=add<cfif request.qGetSystemSetupOptions.autoAddCustViaDOT EQ 1>new</cfif>customer&#session.URLToken#" <cfif listFind("addcustomer,addnewcustomer,CRMNotes,stop,addstop,CustomerContacts,addCustomerContact", event)> class="active" </cfif>>Add Customer</a></li>
+			<li><a href="index.cfm?event=customer&#session.URLToken#&payer=1" <cfif event is 'customer' and structKeyExists(url,'payer') and url.payer is '1'> class="active" </cfif>>Payers</a></li>
+			<li><a href="index.cfm?event=customer&#session.URLToken#&payer=0" <cfif event is 'customer' and structKeyExists(url,'payer') and url.payer is '0'> class="active" </cfif>>Shippers/Consignees</a></li>
+			<cfif request.qGetSystemSetupOptions.TurnOnConsolidatedInvoices>
+				<li><a href="index.cfm?event=createconsolidatedinvoices&#session.URLToken#" <cfif event is 'createconsolidatedinvoices'> class="active" </cfif>>Create Consolidated Invoices</a></li>
+				<li><a href="index.cfm?event=consolidatedinvoicequeue&#session.URLToken#" <cfif	listFindNoCase("consolidatedinvoicequeue,editconsolidatedinvoicequeue", event)> class="active" </cfif>>Consolidated Invoice Queue</a></li>
+			</cfif>
+			<li><a href="index.cfm?event=customerCRMCalls&#session.URLToken#" <cfif event is 'customerCRMCalls'> class="active" </cfif>>CRM Calls</a></li>
+			<li><a href="index.cfm?event=customerCRMCallHistory&#session.URLToken#" <cfif listFindNoCase("customerCRMCallHistory,customerCRMCallDetail", event)> class="active" </cfif>>CRM Call History</a></li>
+			<li><a href="index.cfm?event=customer&#session.URLToken#&Pending=1" <cfif event is 'customer' and structKeyExists(url, "Pending")> class="active" </cfif>>Pending</a></li>
+		<cfelse>
+			<li><a href="index.cfm?event=add<cfif request.qGetSystemSetupOptions.autoAddCustViaDOT EQ 1>new</cfif>customer&#session.URLToken#" <cfif listFind("addcustomer,addnewcustomer,CRMNotes,stop,addstop,CustomerContacts,addCustomerContact", event)> class="active" </cfif>>Add Broker</a></li>
 		</cfif>
-		<li><a href="index.cfm?event=customerCRMCalls&#session.URLToken#" <cfif event is 'customerCRMCalls'> class="active" </cfif>>CRM Calls</a></li>
-		<li><a href="index.cfm?event=customerCRMCallHistory&#session.URLToken#" <cfif listFindNoCase("customerCRMCallHistory,customerCRMCallDetail", event)> class="active" </cfif>>CRM Call History</a></li>
-		<li><a href="index.cfm?event=customer&#session.URLToken#&Pending=1" <cfif event is 'customer' and structKeyExists(url, "Pending")> class="active" </cfif>>Pending</a></li>
 	</ul>
 <div class="clear"></div>
 </div>
