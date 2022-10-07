@@ -1,3 +1,6 @@
+<cfif structKeyExists(url, "delId")>
+	<cfinclude template="wp_loaddelete.cfm">
+</cfif>
 <cfquery name="qgetActiveLoads" datasource="weloadtrailers">
 	SELECT 
 	LoadID,
@@ -45,7 +48,22 @@
 			color:##fff;
 			background-color: ##848484;
 		}
+		.msg-area-success{
+            border: 1px solid ##a4da46;
+            padding: 5px 15px;
+            font-weight: normal;
+            width: 95%;
+            float: left;
+            margin-top: 5px;
+            margin-bottom:  5px;
+            background-color: ##b9e4b9;
+            font-weight: bold;
+            font-style: italic;
+        }
 	</style>
+	<cfif structKeyExists(url, "delId")>
+		<div id="message" class="msg-area-success">#delMsg#</div>
+	</cfif>
 	<table class="loadListTable" width="100%">
 		<thead>
 			<tr>

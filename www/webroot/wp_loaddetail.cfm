@@ -16,7 +16,19 @@
 			    padding-right: 30px!important;
 			    padding-bottom: 15px!important;
 			    padding-left: 30px!important;
-			    float: right;
+		}
+		.iframeDelBtn{
+			    background-color: ##dc3545;
+			    font-size: 18px;
+			    text-decoration: none;
+			    color: ##151221!important;
+			    border-width: 0px!important;
+			    border-radius: 5px;
+			    box-shadow: 6px 6px 18px 0px rgb(0 0 0 / 30%);
+			    padding-top: 15px!important;
+			    padding-right: 30px!important;
+			    padding-bottom: 15px!important;
+			    padding-left: 30px!important;
 		}
 	</style>
 
@@ -46,7 +58,10 @@
 			<td style="border: 1px solid ##c7c3c3;font-size: 12px;">#qgetLoad.ContactEmail#</td>
 		</tr>
 		<tr>
-			<td colspan="2"><a class="iframeBackBtn" href="https://loadmanager.net/weloadtrailers/www/webroot/wp_loadlist.cfm">Back</a></td>
+			<td colspan="2" align="right" style="padding-top: 20px;">
+				<a class="iframeDelBtn" href="https://loadmanager.net/weloadtrailers/www/webroot/wp_loadlist.cfm?delId=#url.LoadID#" onclick="return confirm('Are you sure to delete this load?');">Delete</a>
+				<a class="iframeBackBtn" href="https://loadmanager.net/weloadtrailers/www/webroot/wp_loadlist.cfm">Back</a>
+			</td>
 		</tr>
 	</table>
 </cfoutput>
