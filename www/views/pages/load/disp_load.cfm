@@ -1729,15 +1729,13 @@ function showfullmap(loadid) {
 							<cfelse>
 								<cfset rowNum=(qLoads.currentRow)>
 							</cfif>
-
-							<cfif structKeyExists(session, "IsCustomer")>
-									<cfset onRowClick = "document.location.href='index.cfm?event=addcustomerload&loadid=#qLoads.LOADID#&#session.URLToken#'">
-									<cfset onHrefClick = "index.cfm?event=addcustomerload&loadid=#qLoads.LOADID#&#session.URLToken#">
-							<cfelse>
+							<cfif structKeyExists(session, "currentusertype") AND session.currentusertype EQ "Administrator">
 								<cfset onRowClick = "document.location.href='index.cfm?event=addload&loadid=#qLoads.LOADID#&#session.URLToken#'">
 								<cfset onHrefClick = "index.cfm?event=addload&loadid=#qLoads.LOADID#&#session.URLToken#">
+							<cfelse>
+								<cfset onRowClick = "document.location.href='index.cfm?event=addcustomerload&loadid=#qLoads.LOADID#&#session.URLToken#'">
+								<cfset onHrefClick = "index.cfm?event=addcustomerload&loadid=#qLoads.LOADID#&#session.URLToken#">
 							</cfif>
-
 							<tr style="background:###qLoads.ColorCode#; cursor:pointer;" onmouseover="this.style.background = '##FFFFFF';" onmouseout="this.style.background = '###qLoads.ColorCode#';" <cfif qLoads.Row mod 2 eq 0>bgcolor="##FFFFFF"<cfelse>bgcolor="##f7f7f7"</cfif>>
 								<td height="20" class="sky-bg">&nbsp;</td>
 								<td align="center" valign="middle" nowrap="nowrap" class="sky-bg2" onclick="#onRowClick#">#rowNum#</td>

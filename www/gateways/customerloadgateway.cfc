@@ -9,7 +9,11 @@
 
 		<CFSTOREDPROC PROCEDURE="USP_GetCustomerLoad" DATASOURCE="#variables.dsn#">
 			<CFPROCPARAM VALUE="#arguments.LoadID#" cfsqltype="CF_SQL_VARCHAR">
-			<CFPROCPARAM VALUE="#session.CustomerID#" cfsqltype="CF_SQL_VARCHAR">
+			<cfif structkeyexists(session,"CustomerID")>
+				<CFPROCPARAM VALUE="#session.CustomerID#" cfsqltype="CF_SQL_VARCHAR">
+			<cfelse>
+				<CFPROCPARAM VALUE="" cfsqltype="CF_SQL_VARCHAR" null="true">
+			</cfif>
 			<cfprocresult name="qLoad">
 		</CFSTOREDPROC>
 
@@ -69,7 +73,11 @@
 		    	<cfelse>
 		    		<CFPROCPARAM VALUE="0" cfsqltype="CF_SQL_MONEY">
 		    	</cfif>
-		    	<CFPROCPARAM VALUE="#session.CustomerID#" cfsqltype="CF_SQL_VARCHAR">
+		    	<cfif structkeyexists(session,"CustomerID")>
+					<CFPROCPARAM VALUE="#session.CustomerID#" cfsqltype="CF_SQL_VARCHAR">
+				<cfelse>
+					<CFPROCPARAM VALUE="#session.EmpID#" cfsqltype="CF_SQL_VARCHAR">
+				</cfif>
 		    	<CFPROCPARAM VALUE="#arguments.frmStruct.shipperPickupDate_0#" cfsqltype="CF_SQL_DATE" null="#yesNoFormat(NOT len(trim(arguments.frmStruct.shipperPickupDate_0)))#">
 		    	<CFPROCPARAM VALUE="#arguments.frmStruct.shipperpickupTime_0#" cfsqltype="CF_SQL_VARCHAR" null="#yesNoFormat(NOT len(trim(arguments.frmStruct.shipperpickupTime_0)))#">
 		    	<CFPROCPARAM VALUE="#arguments.frmStruct['consigneePickupDate_#arguments.frmStruct.totalstops#']#" cfsqltype="CF_SQL_DATE" null="#yesNoFormat(NOT len(trim(arguments.frmStruct['consigneePickupDate_#arguments.frmStruct.totalstops#'])))#">
@@ -113,7 +121,11 @@
 			    		<CFPROCPARAM VALUE="#arguments.frmStruct.equipment#" cfsqltype="CF_SQL_VARCHAR" null="#yesNoFormat(NOT len(trim(arguments.frmStruct.equipment)))#">
 			    		<CFPROCPARAM VALUE="#arguments.frmStruct.temperature#" cfsqltype="CF_SQL_VARCHAR" null="#yesNoFormat(NOT len(trim(arguments.frmStruct.temperature)))#">
 			    		<CFPROCPARAM VALUE="#arguments.frmStruct.temperaturescale#" cfsqltype="CF_SQL_VARCHAR" null="#yesNoFormat(NOT len(trim(arguments.frmStruct.temperaturescale)))#">
-			    		<CFPROCPARAM VALUE="#session.CustomerID#" cfsqltype="CF_SQL_VARCHAR">
+			    		<cfif structkeyexists(session,"CustomerID")>
+							<CFPROCPARAM VALUE="#session.CustomerID#" cfsqltype="CF_SQL_VARCHAR">
+						<cfelse>
+							<CFPROCPARAM VALUE="#session.EmpID#" cfsqltype="CF_SQL_VARCHAR">
+						</cfif>
 			    		<CFPROCPARAM VALUE="#cgi.REMOTE_ADDR#" cfsqltype="CF_SQL_VARCHAR">
 			    		<cfprocresult name="qLastInsertedLoadStop">
 	    			</CFSTOREDPROC>
@@ -162,7 +174,11 @@
 						<cfelse>
 							<CFPROCPARAM VALUE="0" cfsqltype="CF_SQL_BIT">
 						</cfif>
-						<CFPROCPARAM VALUE="#session.CustomerID#" cfsqltype="CF_SQL_VARCHAR">
+						<cfif structkeyexists(session,"CustomerID")>
+							<CFPROCPARAM VALUE="#session.CustomerID#" cfsqltype="CF_SQL_VARCHAR">
+						<cfelse>
+							<CFPROCPARAM VALUE="#session.EmpID#" cfsqltype="CF_SQL_VARCHAR">
+						</cfif>
 			    		<CFPROCPARAM VALUE="#cgi.REMOTE_ADDR#" cfsqltype="CF_SQL_VARCHAR">
 			    		<CFPROCPARAM VALUE="#session.adminusername#" cfsqltype="CF_SQL_VARCHAR">
     				</CFSTOREDPROC>
@@ -377,7 +393,11 @@
 							<cfqueryparam value="#col#" cfsqltype="cf_sql_nvarchar">,
 							<cfqueryparam value="#qGetLoadLogBeforeUpdate['#col#'][1]#" cfsqltype="cf_sql_nvarchar">,
 							<cfqueryparam value="#qGetLoadLogAfterUpdate['#col#'][1]#" cfsqltype="cf_sql_nvarchar">,
-							<cfqueryparam value="#session.CustomerID#" cfsqltype="cf_sql_nvarchar">,
+							<cfif structkeyexists(session,"CustomerID")>
+								<cfqueryparam value="#session.CustomerID#" cfsqltype="cf_sql_nvarchar">,
+							<cfelse>
+								<cfqueryparam value="#session.EmpID#" cfsqltype="cf_sql_nvarchar">,
+							</cfif>
 							<cfqueryparam value="#session.adminusername#" cfsqltype="cf_sql_nvarchar">,
 							getdate(),
 							<cfqueryparam value="#cgi.REMOTE_ADDR#" cfsqltype="cf_sql_nvarchar">
@@ -441,8 +461,11 @@
 
 										<cfqueryparam value="#qGetLoadStopLogBeforeUpdate['#col#'][1]#" cfsqltype="cf_sql_nvarchar">,
 										<cfqueryparam value="#qGetLoadStopLogAfterUpdate['#col#'][1]#" cfsqltype="cf_sql_nvarchar">,
-
-										<cfqueryparam value="#session.CustomerID#" cfsqltype="cf_sql_nvarchar">,
+										<cfif structkeyexists(session,"CustomerID")>
+											<cfqueryparam value="#session.CustomerID#" cfsqltype="cf_sql_nvarchar">,
+										<cfelse>
+											<cfqueryparam value="#session.EmpID#" cfsqltype="cf_sql_nvarchar">,
+										</cfif>
 										<cfqueryparam value="#session.adminusername#" cfsqltype="cf_sql_nvarchar">,
 										getdate(),
 										<cfqueryparam value="#cgi.REMOTE_ADDR#" cfsqltype="cf_sql_nvarchar">
@@ -482,7 +505,11 @@
 				    		<CFPROCPARAM VALUE="#arguments.frmStruct.equipment#" cfsqltype="CF_SQL_VARCHAR" null="#yesNoFormat(NOT len(trim(arguments.frmStruct.equipment)))#">
 				    		<CFPROCPARAM VALUE="#arguments.frmStruct.temperature#" cfsqltype="CF_SQL_VARCHAR" null="#yesNoFormat(NOT len(trim(arguments.frmStruct.temperature)))#">
 				    		<CFPROCPARAM VALUE="#arguments.frmStruct.temperaturescale#" cfsqltype="CF_SQL_VARCHAR" null="#yesNoFormat(NOT len(trim(arguments.frmStruct.temperaturescale)))#">
-				    		<CFPROCPARAM VALUE="#session.CustomerID#" cfsqltype="CF_SQL_VARCHAR">
+				    		<cfif structkeyexists(session,"CustomerID")>
+								<CFPROCPARAM VALUE="#session.CustomerID#" cfsqltype="CF_SQL_VARCHAR">
+							<cfelse>
+								<CFPROCPARAM VALUE="#session.EmpID#" cfsqltype="CF_SQL_VARCHAR">
+							</cfif>
 			    			<CFPROCPARAM VALUE="#cgi.REMOTE_ADDR#" cfsqltype="CF_SQL_VARCHAR">
 				    		<cfprocresult name="qLastInsertedLoadStop">
 		    			</CFSTOREDPROC>
@@ -554,8 +581,11 @@
 
 										<cfqueryparam value="#qGetLoadStopItemLogBeforeUpdate['#col#'][1]#" cfsqltype="cf_sql_nvarchar">,
 										<cfqueryparam value="#qGetLoadStopItemLogAfterUpdate['#col#'][1]#" cfsqltype="cf_sql_nvarchar">,
-
-										<cfqueryparam value="#session.CustomerID#" cfsqltype="cf_sql_nvarchar">,
+										<cfif structkeyexists(session,"CustomerID")>
+											<cfqueryparam value="#session.CustomerID#" cfsqltype="cf_sql_nvarchar">,
+										<cfelse>
+											<cfqueryparam value="#session.EmpID#" cfsqltype="cf_sql_nvarchar">,
+										</cfif>
 										<cfqueryparam value="#session.adminusername#" cfsqltype="cf_sql_nvarchar">,
 										getdate(),
 										<cfqueryparam value="#cgi.REMOTE_ADDR#" cfsqltype="cf_sql_nvarchar">
@@ -596,7 +626,11 @@
 							<cfelse>
 								<CFPROCPARAM VALUE="0" cfsqltype="CF_SQL_BIT">
 							</cfif>
-							<CFPROCPARAM VALUE="#session.CustomerID#" cfsqltype="CF_SQL_VARCHAR">
+							<cfif structkeyexists(session,"CustomerID")>
+								<CFPROCPARAM VALUE="#session.CustomerID#" cfsqltype="CF_SQL_VARCHAR">
+							<cfelse>
+								<CFPROCPARAM VALUE="#session.EmpID#" cfsqltype="CF_SQL_VARCHAR">
+							</cfif>
 				    		<CFPROCPARAM VALUE="#cgi.REMOTE_ADDR#" cfsqltype="CF_SQL_VARCHAR">
 				    		<CFPROCPARAM VALUE="#session.adminusername#" cfsqltype="CF_SQL_VARCHAR">
 	    				</CFSTOREDPROC>

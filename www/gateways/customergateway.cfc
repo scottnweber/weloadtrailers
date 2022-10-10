@@ -2255,7 +2255,12 @@
 
    	<cffunction name="getloadCustomer" access="public" returntype="query">
    		<cfquery name="qCustomer" datasource="#Application.dsn#">
-   			SELECT * FROM Customers WHERE CustomerID = <cfqueryparam value="#session.CustomerID#" cfsqltype="varchar">
+   			SELECT * FROM Customers WHERE CustomerID = 
+   			<cfif structkeyexists(session,"CustomerID")>
+   				<cfqueryparam value="#session.CustomerID#" cfsqltype="varchar">
+   			<cfelse>
+   				NULL
+   			</cfif>
    		</cfquery>
    		<cfreturn qCustomer>
    	</cffunction>

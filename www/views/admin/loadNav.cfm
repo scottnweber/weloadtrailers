@@ -214,7 +214,7 @@
 			<a style="padding-right: 5px;" href="index.cfm?event=load&#session.URLToken#&Pending=1"  <cfif event is 'load' and structKeyExists(url, "Pending")> class="active" </cfif>>Pending</a>
 			</td>
 		</tr>
-	<cfelseif structKeyExists(session, "IsCustomer")>
+	<cfelse>
 		<tr>
 			<td>
 				<cfif request.qSystemOptions.LowVolumePlan EQ 1>
@@ -225,15 +225,6 @@
 				<a href="index.cfm?event=addcustomerload&#session.URLToken#" <cfif event is 'addcustomerload'> class="active" </cfif>>Add Load</a>
 			</td>  
 		</tr>
-	<cfelse>
-		<td>
-			<cfif request.qSystemOptions.LowVolumePlan EQ 1>
-				<cfset addLoadUrl = "javascript:checkLoadLimit();">
-			<cfelse>
-				<cfset addLoadUrl = "index.cfm?event=addload&#session.URLToken#">
-			</cfif>
-			<a href="#addLoadUrl#" <cfif listFindNoCase("addload,BOLReport", event)> class="active" </cfif>>Add Load</a>
-		</td> 
 	</cfif>
 	</table>
 

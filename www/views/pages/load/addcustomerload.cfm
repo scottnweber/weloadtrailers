@@ -13,7 +13,11 @@
 <cfset TheKey = 'NAMASKARAM'>
 <cfset Encrypted = Encrypt(Secret, TheKey)>
 <cfset dsn = URLEncodedFormat(ToBase64(Encrypted))>
-
+<cfif structkeyexists(session,"customerid")>
+    <cfset variables.s_id = session.customerid>
+<cfelse>
+    <cfset variables.s_id = session.empid>
+</cfif>
 <cfif structKeyExists(url,"loadToBeCopied")>
     <cfinvoke component="#variables.objcustomerloadGateway#" method="GetCustomerLoadCopy" LoadID="#url.loadToBeCopied#" returnvariable="request.qLoad">
 <cfelse>
@@ -266,6 +270,10 @@
     </div>
     <form name="load"  class="addLoadWrap" id="load" action="index.cfm?event=addcustomerload:process&#session.URLToken#" method="post" onsubmit="return validateCustomerLoad();">
         <input type="hidden" name="LoadID" id="LoadID" value="#request.qLoad.LoadID#">
+        <cfif not structkeyexists(session,"customerid")>
+            <input type="hidden" name="Dispatcher" id="Dispatcher" value="#session.empid#">
+            <input type="hidden" name="Salesperson" id="Salesperson" value="#session.empid#">
+        </cfif>
         <cfset totalstops = -1>
         <cfloop query="request.qLoad" group="StopNo">
             <cfset totalstops++>
@@ -340,22 +348,29 @@
                 </div>
                 <div class="form-con">
                     <fieldset>
+                        <cfif NOT structkeyexists(session,"CustomerID")>
+                            <label style="width: 75px;"><b>Broker*</b></label>
+                            <input name="cutomerIdAuto" id="cutomerIdAuto" value="#request.qLoad.CustName#" placeholder ="Type text here to display list." />
+                            <div class="clear"></div>
+                        </cfif>
                         <label style="width: 75px;">Broker Info</label>
                         <div id="CustInfoNew">
-                            <input type="hidden" name="CustomerID" value="#request.qLoad.CustomerID#">
-                            <input type="hidden" name="CustomerName" value="#request.qLoad.CustName#">
-                            <input type="hidden" name="CustomerLocation" value="#request.qLoad.Address#">
-                            <input type="hidden" name="CustomerCity" value="#request.qLoad.City#">
-                            <input type="hidden" name="CustomerStateCode" value="#request.qLoad.StateCode#">
-                            <input type="hidden" name="CustomerZipCode" value="#request.qLoad.PostalCode#">
+                            <input type="hidden" name="CustomerID" id="CustomerID" value="#request.qLoad.CustomerID#">
+                            <input type="hidden" name="CustomerName" id="CustomerName" value="#request.qLoad.CustName#">
+                            <input type="hidden" name="CustomerLocation" id="CustomerLocation" value="#request.qLoad.Address#">
+                            <input type="hidden" name="CustomerCity" id="CustomerCity" value="#request.qLoad.City#">
+                            <input type="hidden" name="CustomerStateCode" id="CustomerStateCode" value="#request.qLoad.StateCode#">
+                            <input type="hidden" name="CustomerZipCode" id="CustomerZipCode" value="#request.qLoad.PostalCode#">
 
-                            <label class="field-textarea" style="width:188px;">
-                                <b style="color:##4322cc;text-decoration:underline;">
-                                    #request.qLoad.CustName#
-                                </b><br>
-                                #request.qLoad.Address#<br>
-                                #request.qLoad.City#, #request.qLoad.StateCode#<br>
-                                #request.qLoad.PostalCode#
+                            <label class="field-textarea" id="BrokerAddress" style="width:188px;">
+                                <cfif len(trim(request.qLoad.CustomerID))>
+                                    <b style="color:##4322cc;text-decoration:underline;">
+                                        #request.qLoad.CustName#
+                                    </b><br>
+                                    #request.qLoad.Address#<br>
+                                    #request.qLoad.City#, #request.qLoad.StateCode#<br>
+                                    #request.qLoad.PostalCode#
+                                </cfif>
                             </label>
                         </div>
                     </fieldset>
@@ -363,23 +378,23 @@
                 <div class="form-con">
                     <fieldset>
                         <label>Contact</label>
-                        <input name="CustomerContact" value="#request.qLoad.ContactPerson#" style="width: 233px;" maxlength="100">
+                        <input name="CustomerContact" id="CustomerContact" value="#request.qLoad.ContactPerson#" style="width: 233px;" maxlength="100">
                         <div class="clear"></div>
                         <label>Tel</label>
-                        <input name="customerPhone" value="#request.qLoad.Phone#" style="width: 89px;" onchange="ParseUSNumber(this,'Phone');" maxlength="50">
+                        <input name="customerPhone" id="customerPhone" value="#request.qLoad.Phone#" style="width: 89px;" onchange="ParseUSNumber(this,'Phone');" maxlength="50">
                         <label style="width:31px;">Cell</label>
-                        <input name="customerCell" value="#request.qLoad.CellNo#" style="width: 90px;" onchange="ParseUSNumber(this,'Cell');" maxlength="50">
+                        <input name="customerCell" id="customerCell" value="#request.qLoad.CellNo#" style="width: 90px;" onchange="ParseUSNumber(this,'Cell');" maxlength="50">
                         <div class="clear"></div>
                         <label>Fax</label>
-                        <input name="customerFax" value="#request.qLoad.Fax#" style="width: 233px;" onchange="ParseUSNumber(this,'Fax');" maxlength="30">
+                        <input name="customerFax" id="customerFax" value="#request.qLoad.Fax#" style="width: 233px;" onchange="ParseUSNumber(this,'Fax');" maxlength="30">
                         <div class="clear"></div>
                         <label>Email</label>
-                        <input name="CustomerEmail" value="#request.qLoad.ContactEmail#" style="width: 233px;"  maxlength="150">
+                        <input name="CustomerEmail" id="CustomerEmail" value="#request.qLoad.ContactEmail#" style="width: 233px;"  maxlength="150">
                         <div class="clear"></div>
                         <label>PO##</label>
-                        <input name="customerPO" type="text" value="#request.qLoad.CustomerPONo#" class="sm-input disAllowHash myElements" style="width:93px;" maxlength="50">
+                        <input name="customerPO" id="customerPO" type="text" value="#request.qLoad.CustomerPONo#" class="sm-input disAllowHash myElements" style="width:93px;" maxlength="50">
                         <label style="width: 24px;">BOL##</label>
-                        <input name="customerBOL" type="text" value="#request.qLoad.BOLNum#" class="sm-input disAllowHash myElements" style="width:92px;" maxlength="30">
+                        <input name="customerBOL" id="customerBOL" type="text" value="#request.qLoad.BOLNum#" class="sm-input disAllowHash myElements" style="width:92px;" maxlength="30">
                     </fieldset>
                 </div>
                 <div class="clear"></div>
@@ -700,6 +715,40 @@
         })
 
         function initiateAutoComplete(){
+            $('##cutomerIdAuto').each(function(i, tag) {
+                $(tag).autocomplete({
+                    multiple: false,
+                    width: 400,
+                    scroll: true,
+                    scrollHeight: 300,
+                    cacheLength: 1,
+                    highlight: false,
+                    dataType: "json",
+                    autoFocus: true,
+                    source: 'searchCustomersAutoFill.cfm?queryType=getCustomers&CompanyID=#session.CompanyID#',
+                    select: function(e, ui) {
+                        $(this).val(ui.item.name);
+                        $('##CustomerID').val(ui.item.value);
+                        $('##CustomerName').val(ui.item.name);
+                        $('##CustomerLocation').val(ui.item.location);
+                        $('##CustomerCity').val(ui.item.city);
+                        $('##CustomerStateCode').val(ui.item.state);
+                        $('##CustomerZipCode').val(ui.item.zip);
+                        $('##BrokerAddress').html('<b>'+ui.item.name+'</b><br>'+ui.item.location+'<br>'+ui.item.city+', '+ui.item.state+'<br>'+ui.item.zip);
+                        $('##CustomerContact').val(ui.item.contactPerson);
+                        $('##customerPhone').val(ui.item.phoneNo);
+                        $('##customerCell').val(ui.item.cellNo);
+                        $('##customerFax').val(ui.item.fax);
+                        $('##CustomerEmail').val(ui.item.email);
+                        return false;
+                    }
+                })  
+                $(tag).data("ui-autocomplete")._renderItem = function(ul, item) {
+                    return $( "<li>"+item.name+"<br/><b><u>Address</u>:</b> "+ item.location+"&nbsp;&nbsp;&nbsp;<b><u>City</u>:</b>" + item.city+"&nbsp;&nbsp;&nbsp;<b><u>State</u>:</b> " + item.state+"<br/><b><u>Zip</u>:</b> " + item.zip+"</li>" )
+                            .appendTo( ul );
+                }
+            })
+
             $('.shipperAuto').each(function(i, tag) {
                 $(tag).autocomplete({
                     multiple: false,
@@ -989,7 +1038,7 @@
                             LoadID:'#request.qLoad.LoadID#',
                             stopNo:stopNo,
                             LoadNumber:'#request.qLoad.LoadNumber#',
-                            UpdatedByUserID:'#session.CustomerID#',
+                            UpdatedByUserID:'#variables.s_id#',
                             UpdatedBy:'#session.adminUserName#'
                         },
                         beforeSend: function() {
@@ -1098,7 +1147,7 @@
                             SrNo:rowNo,
                             LoadID:'#request.qLoad.LoadID#',
                             LoadNumber:'#request.qLoad.LoadNumber#',
-                            UpdatedByUserID:'#session.customerid#',
+                            UpdatedByUserID:'#variables.s_id#',
                             UpdatedBy:'#session.adminUserName#',
                             stopNo:stopNo,
                             description:description,
@@ -1271,6 +1320,13 @@
 
         function validateCustomerLoad(){
             var rv = true;
+            var CustomerID = $('##CustomerID').val();
+            if (!$.trim(CustomerID).length) {
+                alert('Please choose a broker.');
+                $('##cutomerIdAuto').focus()
+                rv = false;
+            }
+
             var eqLen = $('##EquipmentLength').val();
             if (eqLen.length && (isNaN(eqLen) || $.trim(eqLen) == '')) {
                 alert('Invalid Equipment Length.');
@@ -1404,7 +1460,7 @@
                         stop1:stop1,
                         stop2:stop2,
                         LoadNumber:'#request.qLoad.LoadNumber#',
-                        UpdatedByUserID:'#session.customerid#',
+                        UpdatedByUserID:'#variables.s_id#',
                         UpdatedBy:'#session.adminUserName#'
                     },
                     beforeSend: function() {
