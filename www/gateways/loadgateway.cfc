@@ -4980,7 +4980,9 @@
 				<cfelse>
 					<cfset local.adminUserName = session.adminUserName>
 				</cfif>
-
+				<cfif structKeyExists(session, "iscustomer") and session.iscustomer EQ 1>
+					<cfset local.empid = session.customerid>
+				</cfif>
 				<cfif structKeyExists(arguments, "bulkDelete") and arguments.bulkDelete EQ 1>
 					<cfset tempStruct = structNew()>
 					<cfset tempStruct.LoadStatus = getLoadDetailsForLog.LoadStatus>
