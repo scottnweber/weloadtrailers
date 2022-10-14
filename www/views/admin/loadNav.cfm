@@ -231,7 +231,7 @@
 
 <div class="below-navright" id="helpLink" style="padding-top: 4px;width: 30px;">
 </div>
-<cfif listFindNoCase("load,myLoad", event) and not structKeyExists(session, "IsCustomer") and request.qSystemOptions.LowVolumePlan EQ 0>
+<cfif listFindNoCase("load,myLoad", event) and request.qSystemOptions.LowVolumePlan EQ 0>
 	<div style="float: right;margin-right: -362px;margin-top: -33px;">
 		<strong>Import Loads Via CSV:</strong><br>
 	    <input type="file" id="importCSV"><br>
