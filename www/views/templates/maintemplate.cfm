@@ -741,6 +741,9 @@
 														<td style="width:55px;">
 															<a href="index.cfm?event=load&#Session.URLToken#" <cfif listFindNoCase("load,addload", event)> class="active" </cfif>>All Loads</a>
 														</td>
+														<td>
+															<a href="index.cfm?event=customer&#Session.URLToken#" <cfif listFindNoCase("customer,addcustomer", event)> class="active" </cfif>>Brokers</a>
+														</td>
 														<td class="nobg"><a id="logout" href="index.cfm?event=logout:process&#Session.URLToken#">Logout</a></td>
 													</cfif>
 												</tr>

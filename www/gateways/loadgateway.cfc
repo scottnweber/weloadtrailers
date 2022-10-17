@@ -12817,14 +12817,12 @@
 
 					<cfset CarrierFlatRate = ReplaceNoCase(ReplaceNoCase(qryRow.column_2,'$','','ALL'),',','','ALL')>
 					<cfset CustomerFlatRate = ReplaceNoCase(ReplaceNoCase(qryRow.column_3,'$','','ALL'),',','','ALL')>
-					<cfif structKeyExists(session, "IsCustomer")>
-						<cfset CarrierFlatRate = 0>
-					<cfelseif NOT len(trim(CarrierFlatRate))>
+
+					<cfif NOT len(trim(CarrierFlatRate))>
 						<cfset CarrierFlatRate = 0>
 					</cfif>
-					<cfif structKeyExists(session, "IsCustomer")>
-						<cfset CustomerFlatRate = 0>
-					<cfelseif NOT len(trim(CustomerFlatRate))>
+
+					<cfif NOT len(trim(CustomerFlatRate))>
 						<cfset CustomerFlatRate = 0>
 					</cfif>
 
