@@ -231,12 +231,12 @@
 
 <div class="below-navright" id="helpLink" style="padding-top: 4px;width: 30px;">
 </div>
-<cfif listFindNoCase("load,myLoad", event) and not structKeyExists(session, "IsCustomer") and request.qSystemOptions.LowVolumePlan EQ 0>
-	<div style="float: right;margin-right: -362px;margin-top: -33px;">
+<cfif listFindNoCase("load,myLoad", event) and request.qSystemOptions.LowVolumePlan EQ 0>
+	<div style="float: right;margin-right: -<cfif structKeyExists(session, "iscustomer")>160<cfelse>362</cfif>px;margin-top: -33px;">
 		<strong>Import Loads Via CSV:</strong><br>
 	    <input type="file" id="importCSV"><br>
 	    <a style="text-decoration: underline;" href="https://desk.zoho.com/portal/loadmanager/en/kb/articles/upload-record-to-load-manager" target="_blank">Instructions</a><br>
-	    <a style="text-decoration: underline;" href="../../../LoadManagerAdmin/LoadsImportSampleFile.csv"  download>Download Sample File</a>
+	    <a style="text-decoration: underline;" href="../../../LoadManagerAdmin/LoadsImportSampleFile<cfif structKeyExists(session, "iscustomer")>customer</cfif>.csv"  download>Download Sample File</a>
 	</div>		
 </cfif>
 <cfif structKeyExists(session, "empid") and len(trim(session.empid))>

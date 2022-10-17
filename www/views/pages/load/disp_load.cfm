@@ -158,9 +158,7 @@ $(document).ready(function(){
 		var formData = new FormData();
 		formData.append('file', $('##importCSV')[0].files[0]);
 
-		//var path = urlComponentPath+"loadgateway.cfc?method=uploadCSV&createdBy=#session.AdminUserName#&CompanyID=#session.CompanyID#";
-
-		var path = "ajax.cfm?event=uploadCSV&#session.URLToken#";
+		var path = "ajax.cfm?event=uploadCSV<cfif structKeyExists(session, "iscustomer")>customer</cfif>&#session.URLToken#";
 
 		$.ajax({
 		    url: path,
