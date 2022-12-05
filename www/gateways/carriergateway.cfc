@@ -83,8 +83,11 @@
     <cfprocparam cfsqltype="cf_sql_varchar" value="#arguments.formStruct.MCNumber#">,
     <cfprocparam cfsqltype="cf_sql_varchar" value="#arguments.formStruct.Address#">,
     <cfprocparam cfsqltype="cf_sql_varchar" value="#arguments.formStruct.RegNumber#">,
-   
-    <cfprocparam cfsqltype="cf_sql_varchar" value="#arguments.formStruct.TaxID#">,  
+    <cfif structKeyExists(arguments.formStruct, "TaxID") and  len(arguments.formStruct.TaxID)>
+      <cfprocparam cfsqltype="cf_sql_varchar" value="#arguments.formStruct.TaxID#">,
+    <cfelse>
+      <cfprocparam cfsqltype="cf_sql_varchar" value="" null="true">,
+    </cfif>
     <cfif structKeyExists(arguments.formStruct, "equipment") and  len(arguments.formStruct.equipment)>
       <cfprocparam cfsqltype="cf_sql_varchar" value="#arguments.formStruct.equipment#">,
     <cfelse>
