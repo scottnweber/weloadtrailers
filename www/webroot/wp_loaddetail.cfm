@@ -1,6 +1,6 @@
 <cfquery name="qgetLoad" datasource="weloadtrailers">
 	SELECT LoadNumber,CustName,ContactPerson,Phone,Fax,ContactEmail FROM Loads
-	WHERE LoadID = <cfqueryparam cfsqltype="cf_sql_varchar" value="#url.LoadID#">
+	WHERE LoadID = <cfqueryparam cfsqltype="cf_sql_varchar" value="#url.LoadID#" null="#yesNoFormat(NOT len(url.LoadID))#">
 </cfquery>
 <cfoutput>
 	<style>
